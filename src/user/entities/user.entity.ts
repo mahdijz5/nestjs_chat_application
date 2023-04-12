@@ -1,14 +1,12 @@
 import { hash } from "bcrypt";
-import { BeforeInsert, BeforeUpdate, Column, Entity, JoinColumn, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity } from "../../config/baseEntity";
+import {  BeforeInsert, BeforeUpdate, Column, Entity, JoinColumn, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Room } from "../../room/entities/room.entity";
+import { Message } from "src/message/entities/message.entity";
 
 
-@Entity({name : "user"})
-export class User {
-    @PrimaryGeneratedColumn({
-        type : "bigint"
-    })
-    id : number
-
+@Entity()
+export class User extends BaseEntity {
     @Column({
         type: "varchar",
         length: 150,
@@ -28,6 +26,18 @@ export class User {
         select : false,
     })
     password: string
+    
+    @OneToMany(() => Room , (room) => room.owner)
+    @JoinColumn()
+    ownedRooms : Room[]
+
+    @ManyToMany(() => Room,(room) => room.members)
+    @JoinTable()
+    rooms : Room[]
+
+    @OneToMany(() => Message,(msg) => msg.author)
+    @JoinColumn()
+    messages : Message[]
 
     @BeforeInsert()
     @BeforeUpdate()
@@ -36,5 +46,4 @@ export class User {
             this.password = await hash(this.password, 10);
         }
     }
-
 }
