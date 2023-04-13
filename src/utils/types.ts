@@ -27,11 +27,15 @@ export type UpdatePostParams = {
     body : string
 }
 
-export type CreatePaymentParams = {
+export type CreatePaymentParams = { 
     email : string
     price : number  
 }
 
 export type createRoomParams = {
     name :string
+}
+
+export type createMessageParams = {
+    content :string
 }

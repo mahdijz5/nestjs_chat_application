@@ -26,14 +26,27 @@ export class RoomController {
         }
     }
 
-    @ApiOperation({summary: "Load room data "})
+    @ApiOperation({summary: "get room  "})
     @ApiUnauthorizedResponse()
     @ApiNotFoundResponse()
     @ApiOkResponse()
-    @Get(":roomId")
+    @Get("get/:roomId")
     async getRoom(@Param("roomId",ParseIntPipe) roomId : number) {
         try {
             return await this.roomService.getRoom(roomId)
+        } catch (error) {
+            throw error
+        }
+    }
+
+    @ApiOperation({summary: "Load room (messages,members) "})
+    @ApiUnauthorizedResponse()
+    @ApiNotFoundResponse()
+    @ApiOkResponse()
+    @Get("load/:roomId")
+    async LoadRoom(@Param("roomId",ParseIntPipe) roomId : number) {
+        try {
+            return await this.roomService.loadRoom(roomId)
         } catch (error) {
             throw error
         }

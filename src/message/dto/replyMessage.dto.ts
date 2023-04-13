@@ -1,7 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsNotEmpty, IsNumber, IsString, Length } from "class-validator";
 
-export class CreateMessageDto {
+export class ReplyMessageDto {
     @ApiProperty({
         type: String,
         description: 'This is a required property',
@@ -20,6 +20,13 @@ export class CreateMessageDto {
     @IsNumber()
     roomId : number
 
+    @ApiProperty({
+        type: Number,
+        description: 'This is a required property',
+    })
+    @IsNotEmpty()
+    @IsNumber()
+    msgId : number
 
 
 }

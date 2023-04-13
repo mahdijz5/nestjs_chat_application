@@ -1,3 +1,4 @@
+import { MessageService } from './message/message.service';
 import { UserService } from './user/user.service';
 import { Request, query } from 'express';
 import { RoomService } from './room/room.service';
@@ -20,6 +21,7 @@ import { UserData } from './decorators/userData.decorator';
 import { UserDataWs } from './decorators/userWs.decorator';
 import UserDataInterface from './interface.ts/userData.interface';
 import { QueryWs } from './decorators/queryWs.decorator';
+import { ReplyMessageDto } from './message/dto/replyMessage.dto';
 
 
 @WebSocketGateway({
@@ -30,7 +32,7 @@ import { QueryWs } from './decorators/queryWs.decorator';
 @UseGuards(JwtSocketGuard)
 @UsePipes(new ValidationPipe())
 export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
-    constructor(private roomService: RoomService,private userService: UserService) { }
+    constructor(private roomService: RoomService,private userService: UserService,private messageService:MessageService) { }
 
     @WebSocketServer()
     server: Server;
@@ -38,7 +40,18 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @SubscribeMessage('send_message')
     async handleSendMessage( @ConnectedSocket() client: Socket,@MessageBody() payload: CreateMessageDto,@UserDataWs() user : UserDataInterface,  ): Promise<void> {
         try {
-            this.server.to("room"+payload.roomId).emit('receive_message', {user : {...user},...payload});
+            const msg = await this.messageService.createMessage({content : payload.content},user.id,payload.roomId)
+            this.server.to("room"+payload.roomId).emit('receive_message',msg);
+        } catch (error) {
+            this.handleError(error,client.id)
+        }
+    }
+
+    @SubscribeMessage('reply_message')
+    async handleReplyingMessage(@ConnectedSocket() client: Socket,@MessageBody() payload: ReplyMessageDto,@UserDataWs() user : UserDataInterface,  ): Promise<void> {
+        try {
+            const msg = await this.messageService.replyMessage({content : payload.content},user.id,payload.roomId,payload.msgId)
+            this.server.to("room"+payload.roomId).emit('receive_message', msg);
         } catch (error) {
             this.handleError(error,client.id)
         }
@@ -65,10 +78,10 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }
     }
 
+    //? It gets history of room
     @SubscribeMessage('load_room')
     async loadRoom( @ConnectedSocket() client: Socket,@QueryWs("roomId") roomId : number ): Promise<void> {
         try {
-            console.log(client.connected)
             const room = await this.roomService.loadRoom(roomId)
             this.server.to(client.id).emit('load_room', room);
         } catch (error) {

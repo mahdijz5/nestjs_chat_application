@@ -14,6 +14,7 @@ export class Message extends BaseEntity {
     content: string
 
     @ManyToOne(() => User, (user) => user.messages)
+    @JoinColumn()
     author: User
 
     @ManyToOne(() => Room,(room) => room.messages)
@@ -34,6 +35,7 @@ export class Message extends BaseEntity {
     async setDepth() {
         if (this.depth && this.parent) {
             this.depth = +this.parent.depth + 1
+            this.room = this.parent.room
         }
     }
 }

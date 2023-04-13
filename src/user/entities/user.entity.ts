@@ -36,7 +36,6 @@ export class User extends BaseEntity {
     rooms : Room[]
 
     @OneToMany(() => Message,(msg) => msg.author)
-    @JoinColumn()
     messages : Message[]
 
     @BeforeInsert()

@@ -3,10 +3,11 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Room } from './entities/room.entity';
 import { DeepPartial, FindOneOptions, FindOptionsRelations, FindOptionsWhere, Like, Repository } from 'typeorm';
+import { MessageRepository } from 'src/message/message.repository';
 
 @Injectable()
 export class RoomRepository {
-    constructor(@InjectRepository(Room) private roomRepository: Repository<Room>,) { }
+    constructor(@InjectRepository(Room) private roomRepository: Repository<Room>,private messageRepository : MessageRepository) { }
 
     async search(name: string): Promise<Room[]> {
         if (name) {
@@ -43,11 +44,12 @@ export class RoomRepository {
     }
 
     async loadRoom(id: number): Promise<Room> {
-        const room = this.findOneById(id, { members: true })
+        const room = await this.findOneById(id, { members: true })
 
         if (!room) throw new NotFoundException("Room not found.")
+        const messages  = await this.messageRepository.getMessagesOfRoom(room.id)
 
-        return room
+        return {...room,messages }
 
     }
 
