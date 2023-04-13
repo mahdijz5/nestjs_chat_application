@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { EventModule } from './event/event.module';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './user/user.module';
@@ -11,6 +10,7 @@ import { MessageModule } from './message/message.module';
 import { RoomModule } from './room/room.module';
 import { Room } from './room/entities/room.entity';
 import { Message } from './message/entities/message.entity';
+import { AppGateway } from './app.gateway';
 
 @Module({
   imports: [ConfigModule.forRoot({ isGlobal: true }),
@@ -23,8 +23,9 @@ import { Message } from './message/entities/message.entity';
       database: process.env.DB_NAME,
       entities: [User,Room,Message],
       synchronize: true,
-    }),EventModule,UserModule,AuthModule, MessageModule, RoomModule,],
+    }),UserModule,AuthModule, MessageModule, RoomModule,],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService,AppGateway],
+  
 })
 export class AppModule {}

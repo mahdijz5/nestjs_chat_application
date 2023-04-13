@@ -1,5 +1,5 @@
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
 import { JwtModule } from '@nestjs/jwt';
@@ -7,6 +7,7 @@ import { AuthModule } from 'src/auth/auth.module';
 import { ProvidersEnum } from 'src/utils/enums';
 import { User } from './entities/user.entity';
 import { UserRepository } from './user.repository';
+import { RoomModule } from 'src/room/room.module';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User]), JwtModule.register({
@@ -14,12 +15,9 @@ import { UserRepository } from './user.repository';
     signOptions: {
       expiresIn: "1d"
     }
-  }), AuthModule],
+  }), AuthModule,forwardRef(() => RoomModule)],
   controllers: [UserController],
-  providers: [{
-    provide : ProvidersEnum.uesrService,
-    useClass : UserService
-  },UserRepository],
-  exports : [UserRepository]
+  providers: [UserService,UserRepository],
+  exports : [UserRepository,UserService]
 })
 export class UserModule {}

@@ -9,6 +9,8 @@ import { AuthController } from './auth.controller';
 import { JwtGuard } from './guards/jwt.guard';
 import { User } from 'src/user/entities/user.entity';
 import { UserRepository } from 'src/user/user.repository';
+import { JwtSocketStrategy } from './strategies/jwtSocket.strategy';
+import { JwtSocketGuard } from './guards/jwt-socket.guard';
  
 @Module({
   imports: [TypeOrmModule.forFeature([User]), PassportModule, JwtModule.register({
@@ -17,8 +19,8 @@ import { UserRepository } from 'src/user/user.repository';
       expiresIn: "1d"
     }
   })],
-  providers: [AuthService, LocalStrategy, JwtStrategy, JwtGuard,UserRepository],
+  providers: [AuthService, LocalStrategy, JwtStrategy, JwtGuard,UserRepository,JwtSocketStrategy,JwtSocketGuard],
   controllers: [AuthController],
-  exports: [JwtStrategy,JwtGuard]
+  exports: [JwtStrategy,JwtGuard,JwtSocketStrategy,JwtSocketGuard]
 })
 export class AuthModule {}

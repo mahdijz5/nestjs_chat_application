@@ -31,3 +31,7 @@ export type CreatePaymentParams = {
     email : string
     price : number  
 }
+
+export type createRoomParams = {
+    name :string
+}

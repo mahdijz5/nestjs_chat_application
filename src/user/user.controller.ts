@@ -11,7 +11,7 @@ import UserDataInterface from 'src/interface.ts/userData.interface';
 @Controller('user')
 @ApiBearerAuth()
 export class UserController {
-    constructor(@Inject(ProvidersEnum.uesrService) private userService : UserService) {}
+    constructor(private userService : UserService) {}
 
     @ApiOperation({ summary: "Get user by id" })
     @ApiOkResponse()
