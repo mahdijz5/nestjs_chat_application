@@ -38,4 +38,14 @@ export class RoomService {
             throw error
         }
     }
+
+    async loadRoom(id: number) {
+        try {
+            const room = await this.roomRepository.loadRoom(id)
+            if(!room) throw new NotFoundException("Room not found.")
+            return room
+        } catch (error) {
+            throw error
+        }
+    }
 }

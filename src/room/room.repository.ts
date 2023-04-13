@@ -9,19 +9,19 @@ export class RoomRepository {
     constructor(@InjectRepository(Room) private roomRepository: Repository<Room>,) { }
 
     async search(name: string): Promise<Room[]> {
-        if(name) {
+        if (name) {
             return await this.roomRepository.find({
-                where : {name : Like(name)},
+                where: { name: Like(name) },
                 relations: { members: true }
             })
-        }else {
+        } else {
             return await this.roomRepository.find({
                 relations: { members: true }
             })
-        } 
+        }
     }
 
-    async findOneById(id: number,relations? :FindOptionsRelations<Room> ) {
+    async findOneById(id: number, relations?: FindOptionsRelations<Room>) {
         const room = await this.roomRepository.findOne({
             where: { id },
             relations,
@@ -40,6 +40,15 @@ export class RoomRepository {
 
     async save(room: Room): Promise<Room> {
         return await this.roomRepository.save(room)
+    }
+
+    async loadRoom(id: number): Promise<Room> {
+        const room = this.findOneById(id, { members: true })
+
+        if (!room) throw new NotFoundException("Room not found.")
+
+        return room
+
     }
 
 }

@@ -38,9 +38,7 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @SubscribeMessage('send_message')
     async handleSendMessage( @ConnectedSocket() client: Socket,@MessageBody() payload: CreateMessageDto,@UserDataWs() user : UserDataInterface,  ): Promise<void> {
         try {
-            const room =await this.userService.joinRoom(payload.roomId,user.id)
-            client.join(room.name)
-            this.server.to(room.name).emit('receive_message', {user : {...user},...payload});
+            this.server.to("room"+payload.roomId).emit('receive_message', {user : {...user},...payload});
         } catch (error) {
             this.handleError(error,client.id)
         }
@@ -50,7 +48,7 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
     async joiningRoom( @ConnectedSocket() client: Socket,@UserDataWs() user : UserDataInterface, @QueryWs("roomId") roomId : number ): Promise<void> {
         try {
             const room =await this.userService.joinRoom(roomId,user.id)
-            client.join(room.name)
+            client.join("room"+room.id)
             this.server.to(client.id).emit('response', `You joined to ${room.name}`);
         } catch (error) {
             this.handleError(error,client.id)
@@ -67,6 +65,17 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }
     }
 
+    @SubscribeMessage('load_room')
+    async loadRoom( @ConnectedSocket() client: Socket,@QueryWs("roomId") roomId : number ): Promise<void> {
+        try {
+            console.log(client.connected)
+            const room = await this.roomService.loadRoom(roomId)
+            this.server.to(client.id).emit('load_room', room);
+        } catch (error) {
+            this.handleError(error,client.id)
+        }
+    }
+
 
     handleDisconnect(client: Socket) {
         console.log(`Client disconnected: ${client.id}`)
@@ -76,7 +85,7 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
         console.log(`Client connected: ${client.id}`)
     }
 
-    private handleError(err,id) {
+    private handleError(err : Error,id : string) {
         this.server.to(id).emit("error_handler",err)
     }
 }
